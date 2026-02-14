@@ -38,4 +38,76 @@ public class TaskInfoCfg
     public int needUnlock;                  //是否需要解锁（0不需要1需要）
     public int vitality;                    //活跃度展示
 }
+/// <summary>
+/// 怪物配置表
+/// </summary>
+public class MonsterInfoCfg
+{
+    public int ID;                          // 怪物唯一ID
+    public string name;                     // 怪物名称（可选）
+    public int level;                       // 等级
+    public int hp;                          // 血量
+    public int attack;                      // 攻击力
+    public int attackType;                  // 攻击类型（1近战/2远程/3魔法等）
+    public string modelName;                // 模型名称（Prefab路径）
+    public float moveSpeed;                 // 移动速度（建议补充）
+    public int expReward;                   // 击杀经验奖励
+    public int goldReward;                  // 击杀金币奖励
+    public string dropItems;                // 掉落物品ID列表（用分号分隔，如 "1001;1002"）
+    public int spawnArea;                   // 刷新区域ID
+    public string skills;                   // 技能ID列表（如 "101;202"）
+    public string description;              // 怪物描述（可选）
+    public int jbNumber;                    // 掉落金币数量
+    public int type;                        // 怪物类型1小怪2精英3Boss
+}
+/// <summary>
+/// 关卡配置表
+/// </summary>
+public class LevelInfoCfg
+{
+    public int ID;                          //自增id
+    public int LevelId;                     //关卡id
+    public int AddMonsterTime;              //刷新怪物时间点
+    public int LevelTime;                   //关卡时间
+    public string MonsterInfo;              //怪物数据（id:数量;id:数量）
+    public bool isAdd = false;              //该波次是否已经刷出
+}
+/// <summary>
+/// 技能配置表
+/// </summary>
+public class SkillInfoCfg
+{
+    public int ID;                          //自增id
+    public int skillId;                     //技能id
+    public int type;                        //类型（1武器2技能）
+    public int level;                       //等级
+    public int baseDamage;                //远程伤害值
+    public float attackSpeed;               //攻击速度
+    public int range;                       //攻击范围
+    public int attackType;                  //攻击类型（1定时触发2定时触发协程）
+    public string prefbPath;                //预制体路径
+}
+/// <summary>
+/// 抽卡配置表
+/// </summary>
+public class CardInfoCfg
+{
+    public int ID;                          //自增id
+    public int skillId;                     //技能id
+    public int skillAddId;                  //对应技能表的唯一id
+    public int type;                        //类型（1基础属性2技能）
+    public int level;                       //等级
+    public float number;                    //增加值
+    public string name;                     //名称
+    public string msg;                      //描述
+    public int needJb;                      //购买需要的金币数量
+}
+/// <summary>
+/// 信息配置表
+/// </summary>
+public class MsgInfoCfg
+{
+    public int ID;                          //自增id
+    public string msg;                      //msg
+}
 

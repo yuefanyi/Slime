@@ -77,8 +77,8 @@ public class UiManager : MonoSingleton<UiManager>
         var obj = GetUiByName("Panel_Tips");
         if (obj != null)
         {
-            var awardObj = GameManager.instance.AddPrefab("UI/Tips", obj.transform.Find("Scroll View").Find("Viewport").Find("Content"));
-            //awardObj.GetComponent<TipsAward>().InitTips(_msg, _time);
+            var awardObj = GameManager.instance.AddPrefab("UI/Tips", obj.transform.Find("group"));
+            awardObj.GetComponent<Tips>().InitTipsWithFadeIn(_time, _msg);
         }
         return;
     }
@@ -127,4 +127,9 @@ public class UiManager : MonoSingleton<UiManager>
         }
         return;
     }
+    public void ClearAll()
+    {
+        UiObj.Clear();
+    }
+
 }

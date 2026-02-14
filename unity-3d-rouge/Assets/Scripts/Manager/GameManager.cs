@@ -7,6 +7,9 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using Spine.Unity;
 using UnityEngine.SceneManagement;
+using DamageNumbersPro;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class GameManager :MonoSingleton<GameManager>
 {
@@ -26,6 +29,21 @@ public class GameManager :MonoSingleton<GameManager>
 
     public static int TI_LI_MAX_NUMBER = 100;
     public static int TI_LI_CD_NUMBER = 600;
+    public DamageNumber prefab;
+    public DamageNumber prefabBaoJi;
+    public DamageNumber prefabPlayer;
+
+    //颜色数组
+    [SerializeField] public List<Color> colors = new List<Color>();
+
+    [SerializeField] private Texture2D cursorTexture;
+    [SerializeField] private Vector2 hotSpot = Vector2.zero;
+    [SerializeField] private CursorMode cursorMode = CursorMode.Auto;
+    //后处理相关
+    private Volume globalVolume;
+    private ColorCurves colorCurves;
+    //测试按钮空格用
+    public bool isSpace = false;
 
     #endregion
 
@@ -40,7 +58,7 @@ public class GameManager :MonoSingleton<GameManager>
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        Application.targetFrameRate = 60;//设置帧率为60帧
+        //Application.targetFrameRate = 60;//设置帧率为60帧
         GetLocalPlayerData();
         Random = new System.Random(Guid.NewGuid().GetHashCode());
     }
@@ -50,7 +68,20 @@ public class GameManager :MonoSingleton<GameManager>
 
     private void Start()
     {
+        globalVolume = FindObjectOfType<Volume>();
+        if (globalVolume != null && globalVolume.profile != null)
+        {
+            // 尝试获取Color Curves组件
+            if (globalVolume.profile.TryGet<ColorCurves>(out colorCurves))
+            {
+                // 初始状态设置
+                SetColorCurvesActive(false); // 或 false
+            }
+        }
         this.InvokeRepeating("CheckTime", 0, 0.1f);
+        BeginGame();
+        Cursor.SetCursor(cursorTexture, hotSpot, cursorMode);
+        CreatTipsPanel();
     }
 
     void CheckTime()
@@ -65,8 +96,7 @@ public class GameManager :MonoSingleton<GameManager>
         {
 
         }
-
-
+        BattleManager.GetInstance().CheckTime();
     }
 
 
@@ -113,6 +143,7 @@ public class GameManager :MonoSingleton<GameManager>
     #region OnDestroy()
     private void OnDestroy()
     {
+        Cursor.SetCursor(null, Vector2.zero, cursorMode);
         StopAllCoroutines();
     }
     #endregion
@@ -175,10 +206,61 @@ public class GameManager :MonoSingleton<GameManager>
     {
         string newpath = "Prefab/" + name;
         GameObject obj = ObjPool.instance.GetObj(newpath, fatherTransform);
-        obj.AddComponent<DesObj>();
-        obj.GetComponent<DesObj>().InitDes(newpath);
+        // 检查是否已有 DesObj，没有则添加
+        DesObj desObj = obj.GetComponent<DesObj>();
+        if (desObj == null)
+        {
+            desObj = obj.AddComponent<DesObj>();
+        }
+        desObj.InitDes(newpath);
         return obj;
     }
+    public GameObject AddPrefab(GameObject _obj, Transform fatherTransform)
+    {
+        string newpath = "Prefab/" + name;
+        GameObject obj = ObjPool.instance.GetObj(_obj, fatherTransform);
+        // 检查是否已有 DesObj，没有则添加
+        DesObj desObj = obj.GetComponent<DesObj>();
+        if (desObj == null)
+        {
+            desObj = obj.AddComponent<DesObj>();
+        }
+        desObj.InitDes(newpath);
+        return obj;
+    }
+    /// <summary>
+    /// 添加预制体
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="fatherTransform"></param>
+    /// <returns></returns>
+    public GameObject AddPrefab(GameObject _obj, Transform fatherTransform, Vector3 position, Quaternion rotation)
+    {
+        string newpath = "Prefab/" + name;
+        GameObject obj = ObjPool.instance.GetObj(_obj, fatherTransform, position, rotation);
+        // 检查是否已有 DesObj，没有则添加
+        DesObj desObj = obj.GetComponent<DesObj>();
+        if (desObj == null)
+        {
+            desObj = obj.AddComponent<DesObj>();
+        }
+        desObj.InitDes(newpath);
+        return obj;
+    }
+    public GameObject AddPrefab(string name, Transform fatherTransform, Vector3 position, Quaternion rotation)
+    {
+        string newpath = "Prefab/" + name;
+        GameObject obj = ObjPool.instance.GetObj(newpath, fatherTransform, position, rotation);
+        // 检查是否已有 DesObj，没有则添加
+        DesObj desObj = obj.GetComponent<DesObj>();
+        if (desObj == null)
+        {
+            desObj = obj.AddComponent<DesObj>();
+        }
+        desObj.InitDes(newpath);
+        return obj;
+    }
+
     /// <summary>
     /// 销毁预制体
     /// </summary>
@@ -328,5 +410,96 @@ public class GameManager :MonoSingleton<GameManager>
             }
         }
         return allGameObjects.ToArray();
+    }
+
+    //暂停游戏
+    public void PauseGame()
+    {
+        Time.timeScale = 0f;
+    }
+    //恢复游戏
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f;
+    }
+    public void BeginGame()
+    {
+        prefab.enablePooling = true;
+        prefabBaoJi.enablePooling = true;
+        prefabPlayer.enablePooling = true;
+        UiManager.instance.CreatUi("Panel_Begin");
+    }
+    //开始战斗
+    public void BeginBattle()
+    {
+        BattleManager.GetInstance().BeginGame();
+    }
+    //生成伤害瓢字
+    public void SpawnAttackNumber(Vector3 _vector3, HeroDamage _heroDamage)
+    {
+        if (_heroDamage.type == 1)
+        {
+            prefab.Spawn(_vector3, _heroDamage.finalDamage);
+        }
+        else if (_heroDamage.type == 2)
+        {
+            prefabBaoJi.Spawn(_vector3, _heroDamage.criticalDamage);
+        }
+    }
+    public void SpawnPlayerAttackNumber(Vector3 _vector3, int _damage)
+    {
+        Debug.Log(_vector3);
+        prefabPlayer.Spawn(_vector3, _damage);
+    }
+    //英雄增加属性
+    public void AddHero()
+    {
+        var state = BattleManager.GetInstance().GetHeroObj().GetComponent<PlayerContry>().GetHeroState();
+        state.rangedDamage += 5;
+        //BattleManager.GetInstance().GetWeaponObj().GetComponent<WeaponContry>().UpdateFinalStats();
+    }
+    //根据技能等级切换颜色
+    public void ChangeColor(int _level, Material _materialInstance, float _emissionIntensity)
+    {
+    
+        int index = _level - 1;
+        if (index >= GameManager.instance.colors.Count)
+        {
+            index = GameManager.instance.colors.Count - 1;
+        }
+        Color hdrColor = GameManager.instance.colors[index] * _emissionIntensity;
+        // 设置HDR emission颜色
+        _materialInstance.SetColor("_EmissionColor", hdrColor);
+    }
+    //创建tipsPanel
+    public void CreatTipsPanel()
+    {
+        UiManager.instance.CreatUi("Panel_Tips");
+    }
+    //创建tips
+    public void SetTips(int _keyId)
+    {
+        UiManager.instance.CreatTipsUi(configMag.GetMsgInfoCfgByKey(_keyId).msg, 1f);
+    }
+    //后处理黑白
+    public void SetColorCurvesActive(bool isActive)
+    {
+        if (colorCurves != null)
+        {
+            colorCurves.active = isActive;
+        }
+    }
+    public void TestButton(int _index)
+    {
+        var cfg = BattleManager.GetInstance().configMag.GetMonsterInfoCfgCfgByKey(2);
+        GameManager.instance.StartCoroutine(BattleManager.GetInstance().AddMonsterIenum(cfg, 10));
+    }
+    public void TestButton2()
+    {
+        BattleManager.GetInstance().AddWeaponPinZhiRand();
+    }
+    public void TestButton3()
+    {
+        BattleManager.GetInstance().BuySkillBox();
     }
 }

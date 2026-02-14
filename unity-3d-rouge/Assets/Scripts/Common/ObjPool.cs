@@ -109,6 +109,100 @@ public class ObjPool : Singleton<ObjPool>
         return item;
     }
 
+    public GameObject GetObj(string path, Transform parent_, Vector3 position, Quaternion rotation, bool isSetAsLastSibling = true)
+    {
+        this.AddPoolItem(path);
+        if (DicObjPool[path].listUsed.Count > byte.MaxValue)
+            this.RemoveNullUsed(path);
+
+        GameObject item = null;
+        if (DicObjPool[path].queueUnused.Count > 0)
+        {
+            item = DicObjPool[path].queueUnused.Dequeue();
+
+            if (item == null)
+            {
+                // 修复：递归调用时传递所有参数
+                return GetObj(path, parent_, position, rotation, isSetAsLastSibling);
+            }
+
+            // 关键修复：设置父节点后立即更新位置/旋转
+            item.transform.SetParent(parent_, true); // 改为true保持世界坐标
+            item.transform.SetPositionAndRotation(position, rotation); // 强制更新位置旋转
+
+            if (isSetAsLastSibling)
+                item.transform.SetAsLastSibling();
+
+            item.SetActive(true);
+            DicObjPool[path].listUsed.Add(item);
+            return item;
+        }
+
+        GameObject _prefab = this.LoadPrefab(path);
+        if (_prefab == null)
+        {
+            Debug.LogError($"预制体加载失败，请检查路径: {path}");
+            return null;
+        }
+
+        // 创建新对象并直接应用参数
+        item = UnityEngine.Object.Instantiate(_prefab, position, rotation, parent_);
+
+        if (isSetAsLastSibling)
+            item.transform.SetAsLastSibling();
+
+        DicObjPool[path].listUsed.Add(item);
+        return item;
+    }
+    public GameObject GetObj(GameObject prefabObj, Transform parent_, Vector3 position, Quaternion rotation, bool isSetAsLastSibling = true)
+    {
+        if (prefabObj == null) return null;
+        string path = prefabObj.name;
+
+        this.AddPoolItem(path);
+        if (DicObjPool[path].listUsed.Count > byte.MaxValue)
+            this.RemoveNullUsed(path);
+
+        GameObject item = null;
+        if (DicObjPool[path].queueUnused.Count > 0)
+        {
+            item = DicObjPool[path].queueUnused.Dequeue();
+
+            if (item == null)
+            {
+                // 修复：递归调用时传递所有参数
+                return GetObj(path, parent_, position, rotation, isSetAsLastSibling);
+            }
+
+            // 关键修复：设置父节点后立即更新位置/旋转
+            item.transform.SetParent(parent_, true); // 改为true保持世界坐标
+            item.transform.SetPositionAndRotation(position, rotation); // 强制更新位置旋转
+
+            if (isSetAsLastSibling)
+                item.transform.SetAsLastSibling();
+
+            item.SetActive(true);
+            DicObjPool[path].listUsed.Add(item);
+            return item;
+        }
+
+        GameObject _prefab = this.LoadPrefab(path);
+        if (_prefab == null)
+        {
+            Debug.LogError($"预制体加载失败，请检查路径: {path}");
+            return null;
+        }
+
+        // 创建新对象并直接应用参数
+        item = UnityEngine.Object.Instantiate(_prefab, position, rotation, parent_);
+
+        if (isSetAsLastSibling)
+            item.transform.SetAsLastSibling();
+
+        DicObjPool[path].listUsed.Add(item);
+        return item;
+    }
+
     public GameObject GetObj(GameObject prefabObj, Transform parent_, bool isSetAsLastSibling = true)
     {
         if (prefabObj == null) return null;
@@ -141,7 +235,7 @@ public class ObjPool : Singleton<ObjPool>
         return item;
     }
 
-
+   
 
     /// <summary>如果,对象实例化到某子物体层级，被跟着销毁的时候，已经为Null占用了列表长度空间。
     /// 防止已使用缓存列表存储过多的空值
@@ -262,6 +356,41 @@ public class ObjPool : Singleton<ObjPool>
     {
         prefabCacheDic.Clear();
         dicObjPool.Clear();
+    }
+    public void ClearPoolCompletely()
+    {
+        // 销毁所有未使用的对象
+        foreach (var poolItem in dicObjPool.Values)
+        {
+            // 销毁未使用队列中的对象
+            while (poolItem.queueUnused.Count > 0)
+            {
+                GameObject obj = poolItem.queueUnused.Dequeue();
+                if (obj != null)
+                {
+                    UnityEngine.Object.Destroy(obj);
+                }
+            }
+
+            // 销毁正在使用列表中的对象
+            foreach (GameObject obj in poolItem.listUsed)
+            {
+                if (obj != null)
+                {
+                    UnityEngine.Object.Destroy(obj);
+                }
+            }
+
+            // 清空列表
+            poolItem.listUsed.Clear();
+        }
+
+        // 清空字典
+        prefabCacheDic.Clear();
+        dicObjPool.Clear();
+
+        Debug.Log("对象池已完全清理，包括正在使用的对象");
+
     }
 }
 

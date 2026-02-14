@@ -1,0 +1,42 @@
+[
+  {
+    "ID": 1,
+    "msg": "Attack Bonus:"
+  },
+  {
+    "ID": 2,
+    "msg": "Attack Speed Bonus:"
+  },
+  {
+    "ID": 3,
+    "msg": "Movement Speed Bonus:"
+  },
+  {
+    "ID": 4,
+    "msg": "Attack Range:"
+  },
+  {
+    "ID": 5,
+    "msg": "Luck:"
+  },
+  {
+    "ID": 6,
+    "msg": "Critical Hit:"
+  },
+  {
+    "ID": 7,
+    "msg": "Critical Damage:"
+  },
+  {
+    "ID": 8,
+    "msg": "Bonus Drops:"
+  },
+  {
+    "ID": 1001,
+    "msg": "Insufficient Currency!"
+  },
+  {
+    "ID": 1002,
+    "msg": "No skill slots left!"
+  }
+]

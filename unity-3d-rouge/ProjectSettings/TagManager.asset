@@ -5,6 +5,15 @@ TagManager:
   serializedVersion: 2
   tags:
   - Monster
+  - ZiDan
+  - DiTu
+  - Map
+  - JingYan
+  - XiTie
+  - ChuanSongMenStore
+  - ChuanSongMenBattle
+  - SkillBox
+  - DaoCaoRen
   layers:
   - Default
   - TransparentFX
@@ -14,11 +23,11 @@ TagManager:
   - UI
   - Qiang
   - Monster
-  - 
-  - 
-  - 
-  - 
-  - 
+  - ZiDan
+  - Map
+  - Player
+  - JingYan
+  - DaoJu
   - 
   - 
   - 
@@ -41,4 +50,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UI
+    uniqueID: 154960153
     locked: 0
