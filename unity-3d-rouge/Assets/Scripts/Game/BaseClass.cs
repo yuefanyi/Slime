@@ -128,7 +128,7 @@ public class LevelManagement
     {
         CurrentLevel = 1;
         CurrentEXP = 0;
-        CurrentGkLevel = 1;
+        CurrentGkLevel = 0;
         LevelTime = 0;
         ChangeSkillButtonNumber = 0;
         CurrentJb = 0;

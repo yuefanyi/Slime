@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 using DamageNumbersPro;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using Cinemachine;
 
 public class GameManager :MonoSingleton<GameManager>
 {
@@ -45,6 +46,11 @@ public class GameManager :MonoSingleton<GameManager>
     //测试按钮空格用
     public bool isSpace = false;
 
+    public CinemachineVirtualCamera virtualCamera;
+
+    private float[] fovValues = { 38f, 45f, 50f };
+    private int currentIndex = 0;
+
     #endregion
 
     private void Update()
@@ -52,6 +58,10 @@ public class GameManager :MonoSingleton<GameManager>
         foreach (var item in unityActionList)
         {
             item.Invoke();
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            CycleToNextFOV();
         }
     }
     #region Awake()
@@ -501,5 +511,19 @@ public class GameManager :MonoSingleton<GameManager>
     public void TestButton3()
     {
         BattleManager.GetInstance().BuySkillBox();
+    }
+    void CycleToNextFOV()
+    {
+        if (virtualCamera == null)
+        {
+            Debug.LogError("Virtual Camera 未赋值！");
+            return;
+        }
+
+        // 切换到下一个 FOV 值
+        currentIndex = (currentIndex + 1) % fovValues.Length;
+        virtualCamera.m_Lens.FieldOfView = fovValues[currentIndex];
+
+        Debug.Log($"FOV 已切换到: {fovValues[currentIndex]} (第 {currentIndex + 1}/{fovValues.Length} 次)");
     }
 }
