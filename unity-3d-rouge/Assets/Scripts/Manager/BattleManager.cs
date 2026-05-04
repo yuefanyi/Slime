@@ -1509,4 +1509,12 @@ public class BattleManager : BaseManager<BattleManager>
             hpObj.GetComponent<Hp>().InitHpUi(_obj.transform);
         }
     }
+    //ÉèÖÃ¹Ø¿¨
+    public void SetLevel(int _level)
+    {
+        if (_level >= 1 && _level <=10)
+        {
+            levelManagement.CurrentGkLevel = _level;
+        }
+    }
 }

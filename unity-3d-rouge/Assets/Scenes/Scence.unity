@@ -12891,6 +12891,11 @@ PrefabInstance:
       propertyPath: m_TagString
       value: ChuanSongMenBattle
       objectReference: {fileID: 0}
+    - target: {fileID: 1071292304923200979, guid: 2b3e47ce9bcb4d348aa0a190fdc1bd72,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3512660562949365037, guid: 2b3e47ce9bcb4d348aa0a190fdc1bd72,
         type: 3}
       propertyPath: m_LocalPosition.x

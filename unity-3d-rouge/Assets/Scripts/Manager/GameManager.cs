@@ -49,7 +49,9 @@ public class GameManager :MonoSingleton<GameManager>
     public CinemachineVirtualCamera virtualCamera;
 
     private float[] fovValues = { 38f, 45f, 50f };
+    private float[] yRotationValues = { 0f, 90f, 180f, 270f };
     private int currentIndex = 0;
+    private int currentRotIndex = 0;   // 对应原来的 currentIndex
 
     #endregion
 
@@ -61,7 +63,7 @@ public class GameManager :MonoSingleton<GameManager>
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            CycleToNextFOV();
+            CycleToNextFOVNew();
         }
     }
     #region Awake()
@@ -525,5 +527,24 @@ public class GameManager :MonoSingleton<GameManager>
         virtualCamera.m_Lens.FieldOfView = fovValues[currentIndex];
 
         Debug.Log($"FOV 已切换到: {fovValues[currentIndex]} (第 {currentIndex + 1}/{fovValues.Length} 次)");
+    }
+    void CycleToNextFOVNew()
+    {
+        if (virtualCamera == null)
+        {
+            Debug.LogError("Virtual Camera 未赋值！");
+            return;
+        }
+
+        // 切换到下一个 Y 轴旋转角度
+        currentRotIndex = (currentRotIndex + 1) % yRotationValues.Length;
+        float newYRotation = yRotationValues[currentRotIndex];
+
+        // 获取当前相机的欧拉角，修改 Y 轴，再赋值回去
+        Vector3 currentEuler = virtualCamera.transform.eulerAngles;
+        currentEuler.y = newYRotation;
+        virtualCamera.transform.eulerAngles = currentEuler;
+
+        Debug.Log($"相机 Y 轴旋转切换到: {newYRotation}° (第 {currentRotIndex + 1}/{yRotationValues.Length} 次)");
     }
 }
